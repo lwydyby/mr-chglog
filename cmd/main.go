@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/mattn/go-colorable"
@@ -83,7 +84,27 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 			Name:  "init",
 			Usage: "generate the mr-chglog configuration file in interactive",
 		},
-
+		// bot
+		&cli.BoolFlag{
+			Name:  "bot",
+			Usage: "push mr-chglog changelog to feishu group",
+		},
+		&cli.StringFlag{
+			Name:  "app_id",
+			Usage: "feishu robot app secret",
+		},
+		&cli.StringFlag{
+			Name:  "app_secret",
+			Usage: "feishu robot app secret",
+		},
+		&cli.StringFlag{
+			Name:  "chat_id",
+			Usage: "feishu robot send group chat_id,Please use , to separate multiple",
+		},
+		&cli.StringFlag{
+			Name:  "bot_title",
+			Usage: "feishu robot send release title",
+		},
 		// path
 		&cli.StringSliceFlag{
 			Name:  "path",
@@ -233,6 +254,11 @@ func AppAction(c *cli.Context) error {
 			Sort:             c.String("sort"),
 			AI:               c.Bool("ai"),
 			AIType:           c.String("ai-type"),
+			PushBot:          c.Bool("bot"),
+			AppID:            c.String("app_id"),
+			AppSecret:        c.String("app_secret"),
+			ChatID:           strings.Split(c.String("chat_id"), ","),
+			BotTitle:         c.String("bot_title"),
 		},
 		fs,
 		NewConfigLoader(),

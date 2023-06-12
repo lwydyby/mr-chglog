@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -12,12 +11,19 @@ import (
 
 // Answer ...
 type Answer struct {
-	RepositoryURL string `survey:"repository_url"`
-	Style         string `survey:"style"`
-	Template      string `survey:"template"`
-	ConfigDir     string `survey:"config_dir"`
-	Token         string `survey:"token"`
-	POEToken      string `survey:"poe_token"`
+	RepositoryURL string   `survey:"repository_url"`
+	Style         string   `survey:"style"`
+	Template      string   `survey:"template"`
+	ConfigDir     string   `survey:"config_dir"`
+	Token         string   `survey:"token"`
+	POEToken      string   `survey:"poe_token"`
+	NeedRobot     bool     `survey:"need_robot"`
+	AppID         string   `survey:"app_id"`
+	AppSecret     string   `survey:"app_secret"`
+	ChatID        []string `survey:"chat_id"`
+	BotTitle      string   `survey:"bot_title"`
+	SkipConfig    bool
+	SkipTpl       bool
 }
 
 // Questioner ...
@@ -49,30 +55,90 @@ func (q *questionerImpl) Ask() (*Answer, error) {
 	tpl := filepath.Join(ans.ConfigDir, defaultTemplateFilename)
 	c := q.fs.Exists(config)
 	t := q.fs.Exists(tpl)
-	msg := ""
-
-	switch {
-	case c && t:
-		msg = fmt.Sprintf("\"%s\" and \"%s\" already exists. Do you want to overwrite?", config, tpl)
-	case c:
-		msg = fmt.Sprintf("\"%s\" already exists. Do you want to overwrite?", config)
-	case t:
-		msg = fmt.Sprintf("\"%s\" already exists. Do you want to overwrite?", tpl)
-	}
-
-	if msg != "" {
+	if c {
+		msg := fmt.Sprintf("\"%s\" already exists. Do you want to overwrite?", config)
 		overwrite := false
 		err = survey.AskOne(&survey.Confirm{
 			Message: msg,
 			Default: true,
 		}, &overwrite, nil)
-
-		if err != nil || !overwrite {
-			return nil, errors.New("creation of the file was interrupted")
+		if err != nil {
+			return nil, err
+		}
+		if !overwrite {
+			ans.SkipConfig = true
 		}
 	}
-
+	if t {
+		msg := fmt.Sprintf("\"%s\" already exists. Do you want to overwrite?", tpl)
+		overwrite := false
+		err = survey.AskOne(&survey.Confirm{
+			Message: msg,
+			Default: true,
+		}, &overwrite, nil)
+		if err != nil {
+			return nil, err
+		}
+		if !overwrite {
+			ans.SkipTpl = true
+		}
+	}
+	q.askRobot(ans)
 	return ans, nil
+}
+
+func (q *questionerImpl) askRobot(ans *Answer) {
+	needRobot := false
+	err := survey.AskOne(&survey.Confirm{
+		Message: "Do you want send changelog by feishu robot?",
+		Default: false,
+	}, &needRobot, nil)
+	if err != nil {
+		panic(err)
+	}
+	ans.NeedRobot = needRobot
+	if !needRobot {
+		return
+	}
+	var (
+		appID     string
+		appSecret string
+		chatID    string
+		botTitle  string
+	)
+
+	err = survey.AskOne(&survey.Input{
+		Message: "what is your feishu robot app_id",
+		Default: "",
+	}, &appID, nil)
+	if err != nil {
+		panic(err)
+	}
+	err = survey.AskOne(&survey.Input{
+		Message: "what is your feishu robot app_secret",
+		Default: "",
+	}, &appSecret, nil)
+	if err != nil {
+		panic(err)
+	}
+	err = survey.AskOne(&survey.Multiline{
+		Message: "Which group will your Feishu robot send messages to?",
+		Default: "",
+	}, &chatID, nil)
+	if err != nil {
+		panic(err)
+	}
+	err = survey.AskOne(&survey.Input{
+		Message: "what is your feishu robot push title?",
+		Default: "",
+	}, &botTitle, nil)
+	if err != nil {
+		panic(err)
+	}
+	ans.BotTitle = botTitle
+	ans.AppID = appID
+	ans.AppSecret = appSecret
+	ans.ChatID = strings.Split(chatID, "\n")
 }
 
 func (q *questionerImpl) ask() (*Answer, error) {

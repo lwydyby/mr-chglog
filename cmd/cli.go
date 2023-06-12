@@ -69,6 +69,18 @@ func (c *CLI) prepareConfig() (*config.MRChLogConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(c.ctx.AppID) != 0 {
+		cfg.AppID = c.ctx.AppID
+	}
+	if len(c.ctx.AppSecret) != 0 {
+		cfg.AppSecret = c.ctx.AppSecret
+	}
+	if len(c.ctx.ChatID) != 0 && len(c.ctx.ChatID[0]) != 0 {
+		cfg.ChatID = c.ctx.ChatID
+	}
+	if len(c.ctx.BotTitle) != 0 {
+		cfg.BotTitle = c.ctx.BotTitle
+	}
 	if !filepath.IsAbs(cfg.Template) {
 		cfg.Template = filepath.Join(filepath.Dir(c.ctx.ConfigPath), cfg.Template)
 	}

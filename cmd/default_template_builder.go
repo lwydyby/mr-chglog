@@ -22,6 +22,7 @@ func (t *defaultTemplateBuilderImpl) Build(ans *Answer) (string, error) {
 	// commits
 	tpl += t.commits(".MRs")
 	tpl += t.sql()
+	tpl += t.setBreak()
 	// versions end
 	tpl += "\n{{ end -}}"
 	tpl += "\n{{ end -}}"
@@ -82,4 +83,15 @@ func (t *defaultTemplateBuilderImpl) sql() string {
 {{ end }}
 `
 	return fmt.Sprintf(body, "```sql", "```")
+}
+
+func (t *defaultTemplateBuilderImpl) setBreak() string {
+	body := `
+{{ if .Break }}
+### Break变更
+{{ .Break }}
+
+{{ end }}
+`
+	return body
 }

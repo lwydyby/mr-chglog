@@ -1,6 +1,7 @@
 package git
 
 import (
+	"fmt"
 	"strings"
 	"time"
 	"unicode"
@@ -54,8 +55,7 @@ func (m *MergeRequest) GetChangeSQL() string {
 				headingText := string(node.Text(reader.Source()))
 
 				if headingText == "sql" {
-					child := node.NextSibling()
-					for child != nil {
+					for child := node.NextSibling(); child != nil && child.Kind() != ast.KindHeading; child = child.NextSibling() {
 						if codeBlock, ok := child.(*ast.FencedCodeBlock); ok {
 							lines := codeBlock.Lines()
 							for i := 0; i < lines.Len(); i++ {
@@ -64,7 +64,6 @@ func (m *MergeRequest) GetChangeSQL() string {
 							}
 							return ast.WalkStop, nil
 						}
-						child = child.NextSibling()
 					}
 				}
 			}
@@ -77,10 +76,55 @@ func (m *MergeRequest) GetChangeSQL() string {
 	return sqlContentBuilder.String()
 }
 
+func (m *MergeRequest) GetHeadChange(title string) string {
+	return getTextUnderHeading(m.Description, title)
+}
+
+func getTextUnderHeading(markdown, heading string) string {
+	lines := strings.Split(markdown, "\n")
+	start := -1
+	end := -1
+
+	for i, line := range lines {
+		if strings.TrimSpace(line) == fmt.Sprintf("# %s", heading) {
+			start = i
+			continue
+		}
+		if start != -1 && end == -1 && strings.HasPrefix(strings.TrimSpace(line), "#") {
+			end = i
+			break
+		}
+	}
+
+	if start == -1 {
+		return ""
+	}
+
+	if end == -1 {
+		return strings.Join(lines[start+1:], "\n")
+	}
+
+	return strings.Join(lines[start+1:end], "\n")
+}
+
 func GetSQL(mrs []*MergeRequest) string {
 	var sqlContentBuilder strings.Builder
 	for _, mr := range mrs {
 		sql := mr.GetChangeSQL()
+		if sql != "" {
+			sqlContentBuilder.Write([]byte(sql))
+		}
+	}
+	return sqlContentBuilder.String()
+}
+
+func GetHead(mrs []*MergeRequest, head string) string {
+	var sqlContentBuilder strings.Builder
+	for _, mr := range mrs {
+		sql := mr.GetHeadChange(head)
+		if !strings.HasSuffix(sql, "\n") {
+			sql = sql + "\n"
+		}
 		if sql != "" {
 			sqlContentBuilder.Write([]byte(sql))
 		}

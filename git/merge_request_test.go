@@ -12,6 +12,11 @@ const md = `
 
 Some content
 
+# break
+
+- test1
+- test2
+
 # sql
 
 %s
@@ -21,6 +26,7 @@ Some content
 More content under SQL heading.
 Other content.
 
+
 `
 
 func TestGetChangeSQL(t *testing.T) {
@@ -29,4 +35,12 @@ func TestGetChangeSQL(t *testing.T) {
 		Description: fmt.Sprintf(md, fmt.Sprintf("```sql\n%s```\n", sql)),
 	}
 	assert.Equal(t, sql, mr.GetChangeSQL())
+}
+
+func TestBreakChange(t *testing.T) {
+	mr := &MergeRequest{
+		Description: fmt.Sprintf(md, fmt.Sprintf("```sql\n%s```\n", "sql")),
+	}
+	br := mr.GetHeadChange("break")
+	assert.Equal(t, "\n- test1\n- test2\n", br)
 }

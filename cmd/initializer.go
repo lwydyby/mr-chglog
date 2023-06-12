@@ -42,13 +42,16 @@ func (init *Initializer) Run() int {
 	if err = init.fs.MkdirP(filepath.Join(init.ctx.WorkingDir, ans.ConfigDir)); err != nil {
 		panic(err)
 	}
-
-	if err = init.generateConfig(ans); err != nil {
-		panic(err)
+	if !ans.SkipConfig {
+		if err = init.generateConfig(ans); err != nil {
+			panic(err)
+		}
 	}
 
-	if err = init.generateTemplate(ans); err != nil {
-		panic(err)
+	if !ans.SkipTpl {
+		if err = init.generateTemplate(ans); err != nil {
+			panic(err)
+		}
 	}
 
 	success := color.CyanString("✔")

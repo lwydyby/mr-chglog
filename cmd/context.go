@@ -21,6 +21,11 @@ type CLIContext struct {
 	Sort             string
 	AI               bool
 	AIType           string
+	PushBot          bool
+	AppID            string
+	AppSecret        string
+	ChatID           []string
+	BotTitle         string
 }
 
 type InitContext struct {

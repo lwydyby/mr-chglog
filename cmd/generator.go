@@ -12,6 +12,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 
+	"github.com/lwydyby/mr-chglog/bot"
 	"github.com/lwydyby/mr-chglog/config"
 	"github.com/lwydyby/mr-chglog/git"
 	"github.com/lwydyby/mr-chglog/git/gitlab"
@@ -42,6 +43,11 @@ func (g *generatorImpl) Generate(w io.Writer, ctx *CLIContext, c *config.MRChLog
 		return err
 	}
 	versions := g.getMRGroup(allTags, t, ctx, c)
+	b := &bytes.Buffer{}
+
+	if len(ctx.NextTag) != 0 || ctx.PushBot {
+		w = b
+	}
 	if len(ctx.NextTag) != 0 {
 		versions[len(versions)-1].Tag = &git.Tag{
 			Name: ctx.NextTag,
@@ -51,10 +57,24 @@ func (g *generatorImpl) Generate(w io.Writer, ctx *CLIContext, c *config.MRChLog
 			versions[len(versions)-1].Tag.Previous = versions[len(versions)-2].Tag
 		}
 		versions = versions[len(versions)-1:]
-		b := &bytes.Buffer{}
-		w = b
 		defer func() {
 			g.client.CreateTag(ctx.NextTag, b.String())
+		}()
+	}
+	if ctx.PushBot {
+		defer func() {
+			if ctx.PushBot && len(c.ChatID) != 0 {
+				token, err := bot.GetTenantAccessToken(context.Background(), c)
+				if err != nil {
+					panic(err)
+				}
+				for i := range c.ChatID {
+					err = bot.SendAlertMessage(context.Background(), token, c.ChatID[i], c.BotTitle, b.String())
+					if err != nil {
+						panic(err)
+					}
+				}
+			}
 		}()
 	}
 	return g.render(w, versions)
@@ -62,7 +82,16 @@ func (g *generatorImpl) Generate(w io.Writer, ctx *CLIContext, c *config.MRChLog
 
 func (g *generatorImpl) getMRGroup(tags []*git.Tag, from *git.Tag, ctx *CLIContext, c *config.MRChLogConfig) []*Version {
 	if len(tags) == 0 {
-		return []*Version{}
+		mr := g.client.GetMergeRequests(nil, nil)
+		if ctx.AI {
+			ac := commitBuilderFactory(ctx.AIType, c.POEToken)
+			for j := range mr {
+				g.client.GetMRChanges(mr[j])
+				resp := ac.BuildCommit(context.Background(), mr[j])
+				mr[j].Title = mr[j].Title[:strings.Index(mr[j].Title, ":")+1] + resp
+			}
+		}
+		return []*Version{{Tag: nil, MRs: git.GroupByPrefix(mr), SQL: git.GetSQL(mr), Break: git.GetHead(mr, "break")}}
 	}
 
 	results := make([]*Version, 0, len(tags))
@@ -80,23 +109,24 @@ func (g *generatorImpl) getMRGroup(tags []*git.Tag, from *git.Tag, ctx *CLIConte
 				mr[j].Title = mr[j].Title[:strings.Index(mr[j].Title, ":")+1] + resp
 			}
 		}
-		results = append(results, &Version{Tag: tag, MRs: git.GroupByPrefix(mr), SQL: git.GetSQL(mr)})
+		results = append(results, &Version{Tag: tag, MRs: git.GroupByPrefix(mr), SQL: git.GetSQL(mr), Break: git.GetHead(mr, "break")})
 
 		prevTag = tag
 	}
 
 	if from == nil {
 		mr := g.client.GetMergeRequests(prevTag, nil)
-		results = append(results, &Version{MRs: git.GroupByPrefix(mr), SQL: git.GetSQL(mr)})
+		results = append(results, &Version{MRs: git.GroupByPrefix(mr), SQL: git.GetSQL(mr), Break: git.GetHead(mr, "break")})
 	}
 
 	return results
 }
 
 type Version struct {
-	Tag *git.Tag
-	MRs map[string][]*git.MergeRequest
-	SQL string
+	Tag   *git.Tag
+	MRs   map[string][]*git.MergeRequest
+	SQL   string
+	Break string
 }
 
 func (g *generatorImpl) render(w io.Writer, versions []*Version) error {
