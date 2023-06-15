@@ -36,8 +36,9 @@ func GetTenantAccessToken(ctx context.Context, conf *config.MRChLogConfig) (stri
 	if err != nil {
 		panic(err)
 	}
-
-	defer resp.Body.Close()
+	if resp.Body != nil {
+		defer resp.Body.Close()
+	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
