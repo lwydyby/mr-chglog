@@ -1,4 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/lwydyby/mr-chglog/badge.svg?branch=main)](https://coveralls.io/github/lwydyby/mr-chglog?branch=main)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/lwydyby/mr-chglog/blob/master/LICENSE)
 
 # mr-chglog
 
