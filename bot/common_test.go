@@ -20,6 +20,7 @@ func TestGetTenantAccessToken(t *testing.T) {
 
 	mockey.Mock(http.NewRequest).Return(nil, nil).Build()
 	mockey.Mock(mockey.GetMethod(&http.Client{}, "Do")).Return(&http.Response{}, nil).Build()
+	mockey.Mock(ioutil.ReadAll).Return([]byte(`{}`), nil).Build()
 	token, err := GetTenantAccessToken(context.Background(), conf)
 	assert.Nil(t, err)
 	assert.Equal(t, "", token)
