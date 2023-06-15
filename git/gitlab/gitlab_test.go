@@ -75,12 +75,17 @@ func TestGetMergeRequests(t *testing.T) {
 				ID:                123,
 			},
 		}, nil, nil).Build()
-		mockey.Mock(mockey.GetMethod(c.MergeRequests, "ListProjectMergeRequests")).Return([]*gitlab.MergeRequest{}, &gitlab.Response{
-			CurrentPage: 1,
-			TotalPages:  1,
-		}, nil).Build()
+		mockey.Mock(mockey.GetMethod(c.MergeRequests, "ListProjectMergeRequests")).
+			Return([]*gitlab.MergeRequest{{
+				ID:  123,
+				IID: 123,
+				SHA: "6b3c450c0e313a8b8c694623f87fe32028f1f27d",
+			}}, &gitlab.Response{
+				CurrentPage: 1,
+				TotalPages:  1,
+			}, nil).Build()
 		client := NewGit("123", "http://github.com/xxxx/sxsxs")
-		assert.Equal(t, 0, len(client.GetMergeRequests(nil, nil)))
+		assert.Equal(t, 1, len(client.GetMergeRequests(nil, nil)))
 	})
 }
 
@@ -118,10 +123,31 @@ func TestGetMRChanges(t *testing.T) {
 				ID:                123,
 			},
 		}, nil, nil).Build()
-		mockey.Mock(mockey.GetMethod(c.MergeRequests, "GetMergeRequestChanges")).Return(&gitlab.MergeRequest{}, &gitlab.Response{
-			CurrentPage: 1,
-			TotalPages:  1,
-		}, nil).Build()
+		changes := []struct {
+			OldPath     string `json:"old_path"`
+			NewPath     string `json:"new_path"`
+			AMode       string `json:"a_mode"`
+			BMode       string `json:"b_mode"`
+			Diff        string `json:"diff"`
+			NewFile     bool   `json:"new_file"`
+			RenamedFile bool   `json:"renamed_file"`
+			DeletedFile bool   `json:"deleted_file"`
+		}{
+			{
+				OldPath: "123",
+				NewPath: "312",
+			},
+		}
+		mockey.Mock(mockey.GetMethod(c.MergeRequests, "GetMergeRequestChanges")).
+			Return(&gitlab.MergeRequest{
+				ID:      123,
+				IID:     123,
+				SHA:     "6b3c450c0e313a8b8c694623f87fe32028f1f27d",
+				Changes: changes,
+			}, &gitlab.Response{
+				CurrentPage: 1,
+				TotalPages:  1,
+			}, nil).Build()
 		client := NewGit("123", "http://github.com/xxxx/sxsxs")
 		client.GetMRChanges(&git.MergeRequest{})
 	})
