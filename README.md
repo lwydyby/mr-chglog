@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/lwydyby/mr-chglog/badge.svg?branch=main)](https://coveralls.io/github/lwydyby/mr-chglog?branch=main)
+
 # mr-chglog
 
 ## 简介
