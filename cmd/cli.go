@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"path/filepath"
@@ -56,7 +55,7 @@ func (c *CLI) Run() int {
 		panic(err)
 	}
 
-	fmt.Printf(":sparkles: Generate of %s is completed! (%s)",
+	log.Printf(":sparkles: Generate of %s is completed! (%s)",
 		color.GreenString("\""+c.ctx.OutputPath+"\""),
 		color.New(color.Bold).SprintFunc()(time.Since(start).String()),
 	)

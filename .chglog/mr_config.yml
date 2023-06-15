@@ -7,5 +7,5 @@ poe_token:
 app_id:
 app_secret:
 bot_title:
-# 获取路径: https://open.feishu.cn/api-explorer/cli_a2e211279cbb900c?apiName=list&from=op_doc&project=im&resource=chat&version=v1
+# 获取路径: https://open.feishu.cn/api-explorer/cli_xxxxxxxxxx?apiName=list&from=op_doc&project=im&resource=chat&version=v1
 chat_id:

@@ -3,7 +3,7 @@ package bot
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -36,10 +36,11 @@ func GetTenantAccessToken(ctx context.Context, conf *config.MRChLogConfig) (stri
 	if err != nil {
 		panic(err)
 	}
+	if resp.Body != nil {
+		defer resp.Body.Close()
+	}
 
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}

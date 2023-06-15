@@ -31,15 +31,17 @@ func TestAICommitBuilder_BuildCommit(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			client := &poe.POEClient{}
-			mockey.Mock(mockey.GetMethod(client, "SendMessage")).Return(tt.want).Build()
-			a := &AICommitBuilder{
-				client: client,
-			}
-			if got := a.BuildCommit(tt.args.ctx, tt.args.mr); got != tt.want {
-				t.Errorf("BuildCommit() = %v, want %v", got, tt.want)
-			}
+		mockey.PatchConvey(tt.name, t, func() {
+			t.Run(tt.name, func(t *testing.T) {
+				client := &poe.POEClient{}
+				mockey.Mock(mockey.GetMethod(client, "SendMessage")).Return(tt.want).Build()
+				a := &AICommitBuilder{
+					client: client,
+				}
+				if got := a.BuildCommit(tt.args.ctx, tt.args.mr); got != tt.want {
+					t.Errorf("BuildCommit() = %v, want %v", got, tt.want)
+				}
+			})
 		})
 	}
 }
@@ -64,9 +66,11 @@ func TestNewAICommitBuilder(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			mockey.Mock(poe.NewPOEClient).Return(nil).Build()
-			assert.True(t, NewAICommitBuilder(tt.args.tp, tt.args.token) != nil)
+		mockey.PatchConvey(tt.name, t, func() {
+			t.Run(tt.name, func(t *testing.T) {
+				mockey.Mock(poe.NewPOEClient).Return(nil).Build()
+				assert.True(t, commitBuilderFactory(tt.args.tp, tt.args.token) != nil)
+			})
 		})
 	}
 }

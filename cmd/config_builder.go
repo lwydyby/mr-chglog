@@ -34,7 +34,7 @@ need_robot: %v
 app_id: %s
 app_secret: %s
 bot_title: %s
-# 获取路径: https://open.feishu.cn/api-explorer/cli_a2e211279cbb900c?apiName=list&from=op_doc&project=im&resource=chat&version=v1
+# 获取路径: https://open.feishu.cn/api-explorer/cli_xxxxxxxxx?apiName=list&from=op_doc&project=im&resource=chat&version=v1
 chat_id:
 `,
 		ans.Style,

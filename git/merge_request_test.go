@@ -34,13 +34,37 @@ func TestGetChangeSQL(t *testing.T) {
 	mr := &MergeRequest{
 		Description: fmt.Sprintf(md, fmt.Sprintf("```sql\n%s```\n", sql)),
 	}
-	assert.Equal(t, sql, mr.GetChangeSQL())
+	assert.Equal(t, sql, GetSQL([]*MergeRequest{mr}))
 }
 
 func TestBreakChange(t *testing.T) {
 	mr := &MergeRequest{
 		Description: fmt.Sprintf(md, fmt.Sprintf("```sql\n%s```\n", "sql")),
 	}
-	br := mr.GetHeadChange("break")
+	br := GetHead([]*MergeRequest{mr}, "break")
 	assert.Equal(t, "\n- test1\n- test2\n", br)
+}
+
+func TestGroupByPrefix(t *testing.T) {
+	mrs := []*MergeRequest{
+		{
+			Title: "feat: test",
+		},
+		{
+			Title: "fix: bug",
+		},
+	}
+	want := map[string][]*MergeRequest{
+		"Feat": {
+			{
+				Title: "test",
+			},
+		},
+		"Fix": {
+			{
+				Title: "bug",
+			},
+		},
+	}
+	assert.Equal(t, want, GroupByPrefix(mrs))
 }

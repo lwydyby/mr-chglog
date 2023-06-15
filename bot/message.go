@@ -21,7 +21,7 @@ func SendAlertMessage(ctx context.Context, token, chatID string, title, text str
 	var createResp *MessageItem
 	var createReq *CreateMessageRequest
 
-	cardContent := ConstructAlterCard(title, text)
+	cardContent := constructAlterCard(title, text)
 	createReq = genCreateMessageRequest(ctx, chatID, cardContent, "interactive")
 
 	createResp, err = sendMessage(ctx, token, createReq)
@@ -118,7 +118,7 @@ func genCreateMessageRequest(ctx context.Context, chatID, content, msgType strin
 	}
 }
 
-func ConstructAlterCard(title, desc string) (card string) {
+func constructAlterCard(title, desc string) (card string) {
 	desc = strings.ReplaceAll(desc, "`", "&#96;")
 	cardContent := &CardContent{
 		Config: &CardConfig{
