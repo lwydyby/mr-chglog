@@ -15,13 +15,23 @@ func TestAsk(t *testing.T) {
 		fs := &mockFileSystem{}
 		q := NewQuestioner(c, fs)
 		mockey.Mock(survey.Ask).Return(nil).Build()
-		mockey.Mock(survey.AskOne).Return(nil).Build()
+		mockey.Mock(survey.AskOne).To(func(p survey.Prompt, res interface{}, opts ...survey.AskOpt) error {
+			if res != nil {
+				b, ok := res.(*bool)
+				if ok {
+					*b = true
+				}
+			}
+			return nil
+		}).Build()
 		mockey.Mock(mockey.GetMethod(fs, "Exists")).Return(true).Build()
 		ans, err := q.Ask()
 		assert.Nil(t, err)
 		assert.Equal(t, &Answer{
-			SkipTpl:    true,
-			SkipConfig: true,
+			ChatID:     []string{""},
+			NeedRobot:  true,
+			SkipTpl:    false,
+			SkipConfig: false,
 		}, ans)
 	})
 }
