@@ -10,7 +10,8 @@ import (
 	"github.com/bytedance/mockey"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
-
+	
+	"github.com/lwydyby/mr-chglog/bot"
 	"github.com/lwydyby/mr-chglog/config"
 	"github.com/lwydyby/mr-chglog/git"
 	m_gitlab "github.com/lwydyby/mr-chglog/git/gitlab"
