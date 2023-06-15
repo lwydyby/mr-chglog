@@ -58,11 +58,15 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 
   $ {{.Name}} --config custom/dir/config.yml
 
-		The above is a command that uses a configuration file placed other than ".chglog/config.yml".
+    The above is a command that uses a configuration file placed other than ".chglog/config.yml".
 
-	$ {{.Name}} --path path/to/my/component --output CHANGELOG.component.md
+  $ {{.Name}} --path path/to/my/component --output CHANGELOG.component.md
 
-		Filter commits by specific paths or files in git and output to a component specific changelog.
+    Filter commits by specific paths or files in git and output to a component specific changelog.
+  $ {{.Name}} --bot 
+    Push mr-chglog Changelog to Feishu Group
+  $ {{.Name}} --ai 
+    Use ai create CHANGELOG
 `,
 		ttl("USAGE:"),
 		ttl("OPTIONS:"),
@@ -83,11 +87,6 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 		&cli.BoolFlag{
 			Name:  "init",
 			Usage: "generate the mr-chglog configuration file in interactive",
-		},
-		// bot
-		&cli.BoolFlag{
-			Name:  "bot",
-			Usage: "push mr-chglog changelog to feishu group",
 		},
 		&cli.StringFlag{
 			Name:  "app_id",
@@ -132,6 +131,12 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 			Usage: "specifies git repo URL. If not specified, use 'repository_url' in config",
 		},
 
+		// repository url
+		&cli.StringFlag{
+			Name:  "token",
+			Usage: "specifies git repo token. If not specified, use 'token' in config",
+		},
+
 		// output
 		&cli.StringFlag{
 			Name:    "output",
@@ -144,44 +149,18 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 			Usage: "treat unreleased commits as specified tags (EXPERIMENTAL)",
 		},
 
-		// silent
-		&cli.BoolFlag{
-			Name:  "silent",
-			Usage: "disable stdout output",
-		},
-
-		// no-color
-		&cli.BoolFlag{
-			Name:    "no-color",
-			Usage:   "disable color output",
-			EnvVars: []string{"NO_COLOR"},
-		},
-
-		// no-emoji
-		&cli.BoolFlag{
-			Name:    "no-emoji",
-			Usage:   "disable emoji output",
-			EnvVars: []string{"NO_EMOJI"},
-		},
-
-		// no-case
-		&cli.BoolFlag{
-			Name:  "no-case",
-			Usage: "disable case sensitive filters",
-		},
-
-		// tag-filter-pattern
-		&cli.StringFlag{
-			Name:  "tag-filter-pattern",
-			Usage: "Regular expression of tag filter. Is specified, only matched tags will be picked",
-		},
+		// // tag-filter-pattern
+		// &cli.StringFlag{
+		// 	Name:  "tag-filter-pattern",
+		// 	Usage: "Regular expression of tag filter. Is specified, only matched tags will be picked",
+		// },
 
 		// sort
-		&cli.StringFlag{
-			Name:        "sort",
-			Usage:       "Specify how to sort tags; currently supports \"date\" or by \"semver\"",
-			DefaultText: "date",
-		},
+		// &cli.StringFlag{
+		// 	Name:        "sort",
+		// 	Usage:       "Specify how to sort tags; currently supports \"date\" or by \"semver\"",
+		// 	DefaultText: "date",
+		// },
 
 		&cli.StringFlag{
 			Name:  "create-tag",
@@ -197,6 +176,12 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 			Usage:       "which ai API to use create CHANGELOG",
 			DefaultText: "poe",
 			Value:       "poe",
+		},
+
+		// bot
+		&cli.BoolFlag{
+			Name:  "bot",
+			Usage: "push mr-chglog changelog to feishu group",
 		},
 
 		// help & version
@@ -238,27 +223,25 @@ func AppAction(c *cli.Context) error {
 	}
 	chglogCLI := NewCLI(
 		&CLIContext{
-			WorkingDir:       wd,
-			Stdout:           colorable.NewColorableStdout(),
-			Stderr:           colorable.NewColorableStderr(),
-			ConfigPath:       c.String("config"),
-			Template:         c.String("template"),
-			OutputPath:       c.String("output"),
-			Silent:           c.Bool("silent"),
-			NoColor:          c.Bool("no-color"),
-			NoEmoji:          c.Bool("no-emoji"),
-			NoCaseSensitive:  c.Bool("no-case"),
-			Query:            c.Args().First(),
-			NextTag:          c.String("next-tag"),
-			TagFilterPattern: c.String("tag-filter-pattern"),
-			Sort:             c.String("sort"),
-			AI:               c.Bool("ai"),
-			AIType:           c.String("ai-type"),
-			PushBot:          c.Bool("bot"),
-			AppID:            c.String("app_id"),
-			AppSecret:        c.String("app_secret"),
-			ChatID:           strings.Split(c.String("chat_id"), ","),
-			BotTitle:         c.String("bot_title"),
+			WorkingDir: wd,
+			Stdout:     colorable.NewColorableStdout(),
+			Stderr:     colorable.NewColorableStderr(),
+			ConfigPath: c.String("config"),
+			Template:   c.String("template"),
+			OutputPath: c.String("output"),
+			Query:      c.Args().First(),
+			NextTag:    c.String("next-tag"),
+			// TagFilterPattern: c.String("tag-filter-pattern"),
+			// Sort:             c.String("sort"),
+			AI:            c.Bool("ai"),
+			AIType:        c.String("ai-type"),
+			PushBot:       c.Bool("bot"),
+			RepositoryURL: c.String("repository-url"),
+			Token:         c.String("token"),
+			AppID:         c.String("app_id"),
+			AppSecret:     c.String("app_secret"),
+			ChatID:        strings.Split(c.String("chat_id"), ","),
+			BotTitle:      c.String("bot_title"),
 		},
 		fs,
 		NewConfigLoader(),

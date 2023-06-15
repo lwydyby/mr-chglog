@@ -12,6 +12,7 @@ import (
 var (
 	createMessageURL     = "https://open.feishu.cn/open-apis/im/v1/messages"
 	getMessageHistoryURL = "https://open.feishu.cn/open-apis/im/v1/messages"
+	pinURL               = "https://open.feishu.cn/open-apis/im/v1/pins"
 )
 
 func SendAlertMessage(ctx context.Context, token, chatID string, title, text string) error {
@@ -29,7 +30,7 @@ func SendAlertMessage(ctx context.Context, token, chatID string, title, text str
 	}
 
 	msgID := createResp.MessageID
-	fmt.Printf("succeed send alert message, msg_id: %v", msgID)
+	pinMessage(token, msgID)
 	return nil
 }
 
@@ -74,6 +75,41 @@ func sendMessage(ctx context.Context, token string, createReq *CreateMessageRequ
 	return createMessageResp.Data, nil
 }
 
+func pinMessage(token string, messageID string) {
+	cli := &http.Client{}
+
+	reqBytes, err := json.Marshal(&PinMessageRequest{
+		MessageID: messageID,
+	})
+	if err != nil {
+		panic(err)
+	}
+	req, err := http.NewRequest("POST", pinURL, strings.NewReader(string(reqBytes)))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	resp, err := cli.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	pinMessageResp := &PinMessageResponse{}
+	err = json.Unmarshal(body, pinMessageResp)
+	if err != nil {
+		panic(err)
+	}
+	if pinMessageResp.Code != 0 {
+		fmt.Println(string(body))
+		panic(err)
+	}
+}
+
 func genCreateMessageRequest(ctx context.Context, chatID, content, msgType string) *CreateMessageRequest {
 	return &CreateMessageRequest{
 		ReceiveID: chatID,
@@ -83,6 +119,7 @@ func genCreateMessageRequest(ctx context.Context, chatID, content, msgType strin
 }
 
 func ConstructAlterCard(title, desc string) (card string) {
+	desc = strings.ReplaceAll(desc, "`", "&#96;")
 	cardContent := &CardContent{
 		Config: &CardConfig{
 			WideScreenMode: true,

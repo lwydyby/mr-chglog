@@ -7,17 +7,17 @@ import (
 )
 
 var tags = []*Tag{{
-	Name: "v0.1.0",
-}, {
-	Name: "v0.2.0",
-}, {
-	Name: "v0.3.0",
-}, {
-	Name: "v0.4.0",
+	Name: "v0.6.0",
 }, {
 	Name: "v0.5.0",
 }, {
-	Name: "v0.6.0",
+	Name: "v0.4.0",
+}, {
+	Name: "v0.3.0",
+}, {
+	Name: "v0.2.0",
+}, {
+	Name: "v0.1.0",
 }}
 
 func TestSelect(t *testing.T) {
@@ -28,53 +28,53 @@ func TestSelect(t *testing.T) {
 		{
 			query: "",
 			want: []*Tag{{
-				Name: "v0.1.0",
-			}, {
-				Name: "v0.2.0",
-			}, {
-				Name: "v0.3.0",
-			}, {
-				Name: "v0.4.0",
+				Name: "v0.6.0",
 			}, {
 				Name: "v0.5.0",
 			}, {
-				Name: "v0.6.0",
+				Name: "v0.4.0",
+			}, {
+				Name: "v0.3.0",
+			}, {
+				Name: "v0.2.0",
+			}, {
+				Name: "v0.1.0",
 			}},
 		},
 		{
 			query: "..v0.4.0",
 			want: []*Tag{{
-				Name: "v0.1.0",
-			}, {
-				Name: "v0.2.0",
+				Name: "v0.4.0",
 			}, {
 				Name: "v0.3.0",
 			}, {
-				Name: "v0.4.0",
+				Name: "v0.2.0",
+			}, {
+				Name: "v0.1.0",
 			}},
 		},
 		{
 			query: "v0.2.0..v0.4.0",
 			want: []*Tag{{
-				Name: "v0.2.0",
+				Name: "v0.4.0",
 			}, {
 				Name: "v0.3.0",
 			}, {
-				Name: "v0.4.0",
+				Name: "v0.2.0",
 			}},
 		},
 		{
 			query: "v0.2.0..",
 			want: []*Tag{{
-				Name: "v0.2.0",
-			}, {
-				Name: "v0.3.0",
-			}, {
-				Name: "v0.4.0",
+				Name: "v0.6.0",
 			}, {
 				Name: "v0.5.0",
 			}, {
-				Name: "v0.6.0",
+				Name: "v0.4.0",
+			}, {
+				Name: "v0.3.0",
+			}, {
+				Name: "v0.2.0",
 			}},
 		},
 		{

@@ -84,6 +84,16 @@ func (c *CLI) prepareConfig() (*config.MRChLogConfig, error) {
 	if !filepath.IsAbs(cfg.Template) {
 		cfg.Template = filepath.Join(filepath.Dir(c.ctx.ConfigPath), cfg.Template)
 	}
+	if len(c.ctx.Template) != 0 {
+		cfg.Template = c.ctx.Template
+	}
+	if len(c.ctx.RepositoryURL) != 0 {
+		cfg.RepositoryURL = c.ctx.RepositoryURL
+	}
+	if len(c.ctx.Token) != 0 {
+		cfg.Token = c.ctx.Token
+	}
+
 	return cfg, nil
 }
 

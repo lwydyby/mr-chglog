@@ -156,6 +156,18 @@ type CreateMessageRequest struct {
 	MsgType   string `json:"msg_type"`
 }
 
+type PinMessageRequest struct {
+	MessageID string `json:"message_id"`
+}
+
+type PinMessageResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		Pin *MessageItem `json:"pin"`
+	} `json:"data"`
+}
+
 type CreateMessageResponse struct {
 	Code    int          `json:"code"`
 	Message string       `json:"message"`

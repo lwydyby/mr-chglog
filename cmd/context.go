@@ -18,6 +18,8 @@ type CLIContext struct {
 	Query            string
 	NextTag          string
 	TagFilterPattern string
+	RepositoryURL    string
+	Token            string
 	Sort             string
 	AI               bool
 	AIType           string

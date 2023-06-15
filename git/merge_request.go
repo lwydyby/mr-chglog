@@ -122,7 +122,7 @@ func GetHead(mrs []*MergeRequest, head string) string {
 	var sqlContentBuilder strings.Builder
 	for _, mr := range mrs {
 		sql := mr.GetHeadChange(head)
-		if !strings.HasSuffix(sql, "\n") {
+		if sql != "" && !strings.HasSuffix(sql, "\n") {
 			sql = sql + "\n"
 		}
 		if sql != "" {
