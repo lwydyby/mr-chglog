@@ -1,5 +1,13 @@
 package cmd
 
+import (
+	"os"
+	"testing"
+
+	"github.com/bytedance/mockey"
+	"github.com/stretchr/testify/assert"
+)
+
 type mockFileSystem struct {
 	ReturnExists    func(string) bool
 	ReturnMkdirP    func(string) error
@@ -30,4 +38,17 @@ type mockFile struct {
 
 func (m *mockFile) Write(b []byte) (int, error) {
 	return m.ReturnWrite(b)
+}
+
+func TestFs(t *testing.T) {
+	mockey.PatchConvey("fs", t, func() {
+		mockey.Mock(os.Stat).Return(nil, nil).Build()
+		mockey.Mock(os.Create).Return(nil, nil).Build()
+		mockey.Mock(os.WriteFile).Return(nil).Build()
+		sys := &osFileSystem{}
+		assert.Equal(t, true, sys.Exists(""))
+		_, err := sys.Create("")
+		assert.Nil(t, err)
+		assert.Nil(t, sys.WriteFile("", nil))
+	})
 }
