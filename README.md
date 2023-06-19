@@ -108,6 +108,14 @@ EXAMPLE:
 
 ```
 
+## MR Description约定
+### 数据库变更
+![image](https://github.com/lwydyby/mr-chglog/assets/30611869/5a7b11f7-509a-4cfd-95d8-aa2e1cda8b8e)
+### break变更
+![image](https://github.com/lwydyby/mr-chglog/assets/30611869/a7f2474b-0be7-444b-bdf5-fd7723da8d1a)
+
+
+
 ## TODO
 
 - [x] 支持更丰富的模板
