@@ -1,3 +1,8 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/lwydyby/mr-chglog)](https://goreportcard.com/report/github.com/lwydyby/mr-chglog)
+[![Quality](https://github.com/lwydyby/mr-chglog/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/lwydyby/mr-chglog/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/github/lwydyby/mr-chglog/badge.svg?branch=main)](https://coveralls.io/github/lwydyby/mr-chglog?branch=main)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/lwydyby/mr-chglog/blob/master/LICENSE)
+
 # mr-chglog
 
 ## 简介
@@ -102,6 +107,14 @@ EXAMPLE:
     Use ai create CHANGELOG
 
 ```
+
+## MR Description约定
+### 数据库变更
+![image](https://github.com/lwydyby/mr-chglog/assets/30611869/5a7b11f7-509a-4cfd-95d8-aa2e1cda8b8e)
+### break变更
+![image](https://github.com/lwydyby/mr-chglog/assets/30611869/a7f2474b-0be7-444b-bdf5-fd7723da8d1a)
+
+
 
 ## TODO
 
