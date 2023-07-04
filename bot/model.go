@@ -305,9 +305,9 @@ type UploadImageResponseBody struct {
 Message card
 */
 type CardContent struct {
-	Config   *CardConfig   `json:"config,omitempty"`
-	Header   *CardHeader   `json:"header,omitempty"`
-	Elements []interface{} `json:"elements,omitempty"`
+	Config   *CardConfig    `json:"config,omitempty"`
+	Header   *CardHeader    `json:"header,omitempty"`
+	Elements []*CardElement `json:"elements,omitempty"`
 }
 
 type CardConfig struct {
