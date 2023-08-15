@@ -5,12 +5,15 @@ go 1.20
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/Masterminds/sprig/v3 v3.2.3
+	github.com/bytedance/mockey v1.2.4
 	github.com/fatih/color v1.15.0
+	github.com/lwydyby/poe-api v1.0.0
 	github.com/mattn/go-colorable v0.1.13
 	github.com/stretchr/testify v1.8.2
 	github.com/tsuyoshiwada/go-gitcmd v0.0.0-20180205145712-5f1f5f9475df
 	github.com/urfave/cli/v2 v2.25.4
 	github.com/xanzy/go-gitlab v0.83.0
+	github.com/yuin/goldmark v1.5.4
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -21,11 +24,9 @@ require (
 	github.com/bogdanfinn/fhttp v0.5.23 // indirect
 	github.com/bogdanfinn/tls-client v1.3.12 // indirect
 	github.com/bogdanfinn/utls v1.5.16 // indirect
-	github.com/bytedance/mockey v1.2.4 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/gomarkdown/markdown v0.0.0-20230322041520-c84983bdbf2a // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 // indirect
@@ -37,7 +38,6 @@ require (
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/compress v1.15.12 // indirect
-	github.com/lwydyby/poe-api v0.0.1 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
@@ -49,9 +49,9 @@ require (
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/tam7t/hpkp v0.0.0-20160821193359-2b70b4024ed5 // indirect
-	github.com/thoas/go-funk v0.9.3 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
-	github.com/yuin/goldmark v1.5.4 // indirect
+	github.com/zhangyunhao116/fastrand v0.3.0 // indirect
+	github.com/zhangyunhao116/skipmap v0.10.1 // indirect
 	golang.org/x/arch v0.0.0-20201008161808-52c3e6f60cff // indirect
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
