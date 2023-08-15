@@ -136,6 +136,8 @@ func GroupByPrefix(mrs []*MergeRequest) map[string][]*MergeRequest {
 	grouped := make(map[string][]*MergeRequest)
 
 	for _, mr := range mrs {
+		// 需要将skipped从title中移除
+		mr.Title = strings.ReplaceAll(mr.Title, "[skipped]", "")
 		parts := strings.SplitN(mr.Title, ":", 2)
 		prefix := "Other"
 		if len(parts) > 1 {

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"io"
+	"strings"
 )
 
 type CLIContext struct {
@@ -28,6 +29,11 @@ type CLIContext struct {
 	AppSecret        string
 	ChatID           []string
 	BotTitle         string
+	Update           bool
+}
+
+func (c CLIContext) IsSingleTag() bool {
+	return len(strings.Split(c.Query, "..")) == 1 && len(c.Query) != 0
 }
 
 type InitContext struct {

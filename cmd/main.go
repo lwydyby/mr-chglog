@@ -64,7 +64,7 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 
     Filter commits by specific paths or files in git and output to a component specific changelog.
   $ {{.Name}} --bot 
-    Push mr-chglog Changelog to Feishu Group
+    Push mr-changelog  Changelog to Feishu Group
   $ {{.Name}} --ai 
     Use ai create CHANGELOG
 `,
@@ -78,15 +78,15 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 	}
 
 	app := cli.NewApp()
-	app.Name = "mr-chglog"
-	app.Usage = "todo usage for mr-chglog"
+	app.Name = "mr-changelog "
+	app.Usage = "todo usage for mr-changelog "
 	app.Version = version
 
 	app.Flags = []cli.Flag{
 		// init
 		&cli.BoolFlag{
 			Name:  "init",
-			Usage: "generate the mr-chglog configuration file in interactive",
+			Usage: "generate the mr-changelog  configuration file in interactive",
 		},
 		&cli.StringFlag{
 			Name:  "app_id",
@@ -171,6 +171,10 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 			Name:  "ai",
 			Usage: "use ai create CHANGELOG",
 		},
+		&cli.BoolFlag{
+			Name:  "update",
+			Usage: "update tag release",
+		},
 		&cli.StringFlag{
 			Name:        "ai-type",
 			Usage:       "which ai API to use create CHANGELOG",
@@ -181,7 +185,7 @@ func CreateApp(actionFunc cli.ActionFunc) *cli.App {
 		// bot
 		&cli.BoolFlag{
 			Name:  "bot",
-			Usage: "push mr-chglog changelog to feishu group",
+			Usage: "push mr-changelog  changelog to feishu group",
 		},
 
 		// help & version
@@ -242,6 +246,7 @@ func AppAction(c *cli.Context) error {
 			AppSecret:     c.String("app_secret"),
 			ChatID:        strings.Split(c.String("chat_id"), ","),
 			BotTitle:      c.String("bot_title"),
+			Update:        c.Bool("update"),
 		},
 		fs,
 		NewConfigLoader(),

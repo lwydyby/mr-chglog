@@ -45,7 +45,7 @@ func (g *generatorImpl) Generate(w io.Writer, ctx *CLIContext, c *config.MRChLog
 	versions := g.getMRGroup(allTags, t, ctx, c)
 	b := &bytes.Buffer{}
 
-	if len(ctx.NextTag) != 0 || ctx.PushBot {
+	if len(ctx.NextTag) != 0 || ctx.PushBot || ctx.Update {
 		w = b
 	}
 	if len(ctx.NextTag) != 0 {
@@ -59,6 +59,11 @@ func (g *generatorImpl) Generate(w io.Writer, ctx *CLIContext, c *config.MRChLog
 		versions = versions[len(versions)-1:]
 		defer func() {
 			g.client.CreateTag(ctx.NextTag, b.String())
+		}()
+	}
+	if ctx.Update && ctx.IsSingleTag() {
+		defer func() {
+			g.client.UpdateTagRelease(versions[0].Tag.Name, b.String())
 		}()
 	}
 	if ctx.PushBot {
@@ -114,7 +119,7 @@ func (g *generatorImpl) getMRGroup(tags []*git.Tag, from *git.Tag, ctx *CLIConte
 		prevTag = tag
 	}
 
-	if from == nil {
+	if from == nil && !ctx.IsSingleTag() {
 		mr := g.client.GetMergeRequests(prevTag, nil)
 		results = append(results, &Version{MRs: git.GroupByPrefix(mr), SQL: git.GetSQL(mr), Break: git.GetHead(mr, "break")})
 	}

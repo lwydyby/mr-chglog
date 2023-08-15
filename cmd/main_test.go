@@ -20,7 +20,7 @@ func getMockAppAction(t *testing.T) func(c *cli.Context) error {
 func TestCreateApp(t *testing.T) {
 	app := CreateApp(getMockAppAction(t))
 	args := []string{
-		"mr-chglog",
+		"mr-changelog ",
 		"--config", "c.yml",
 		"--output", "o.md",
 		"--next-tag", "v5",
@@ -30,4 +30,3 @@ func TestCreateApp(t *testing.T) {
 		log.Fatal(err)
 	}
 }
-

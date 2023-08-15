@@ -81,21 +81,21 @@ func (g *Gitlab) GetTags() []*git.Tag {
 }
 
 func (g *Gitlab) GetMergeRequests(from, end *git.Tag) []*git.MergeRequest {
-	var startCommit, endCommit *gitlab.Commit
-	var err error
-
+	var startTime, endTime *time.Time
 	if from != nil {
-		startCommit, _, err = g.client.Commits.GetCommit(g.projectID, from.Name)
+		startCommit, _, err := g.client.Commits.GetCommit(g.projectID, from.Name)
 		if err != nil {
 			log.Fatalf("Error fetching start tag commit: %s", err)
 		}
+		startTime = g.getCommitDate(startCommit)
 	}
 
 	if end != nil {
-		endCommit, _, err = g.client.Commits.GetCommit(g.projectID, end.Name)
+		endCommit, _, err := g.client.Commits.GetCommit(g.projectID, end.Name)
 		if err != nil {
 			log.Fatalf("Error fetching end tag commit: %s", err)
 		}
+		endTime = g.getCommitDate(endCommit)
 	}
 
 	options := &gitlab.ListProjectMergeRequestsOptions{
@@ -105,12 +105,12 @@ func (g *Gitlab) GetMergeRequests(from, end *git.Tag) []*git.MergeRequest {
 		},
 		State: gitlab.String("merged"),
 	}
-	if startCommit != nil {
-		options.CreatedAfter = startCommit.CommittedDate
+	if startTime != nil {
+		options.UpdatedAfter = startTime
 	}
-	if endCommit != nil {
-		before := endCommit.CommittedDate.Add(1 * time.Second)
-		options.CreatedBefore = &before
+	if endTime != nil {
+		before := endTime.Add(1 * time.Second)
+		options.UpdatedBefore = &before
 	}
 
 	var allMRs []*gitlab.MergeRequest
@@ -178,6 +178,60 @@ func (g *Gitlab) GetMRChanges(mr *git.MergeRequest) {
 		})
 	}
 	mr.Changes = diff
+}
+
+func (g *Gitlab) UpdateTagRelease(tagName string, desc string) {
+	opt := &gitlab.CreateReleaseNoteOptions{
+		Description: gitlab.String(desc),
+	}
+	_, _, err := g.client.Tags.CreateReleaseNote(g.projectID, tagName, opt)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (g *Gitlab) getCommitDate(commit *gitlab.Commit) *time.Time {
+	options := &gitlab.ListProjectMergeRequestsOptions{
+		ListOptions: gitlab.ListOptions{
+			PerPage: 10,
+			Page:    1,
+		},
+		State:          gitlab.String("merged"),
+		AuthorUsername: &commit.AuthorName,
+		Sort:           gitlab.String("desc"),
+		OrderBy:        gitlab.String("created_at"),
+	}
+	for {
+		mrs, resp, err := g.client.MergeRequests.ListProjectMergeRequests(g.projectID, options)
+		if err != nil {
+			log.Fatalf("Error fetching merge requests: %s", err)
+		}
+		for i := range mrs {
+			commits, _, err := g.client.MergeRequests.GetMergeRequestCommits(g.projectID, mrs[i].IID, &gitlab.GetMergeRequestCommitsOptions{})
+			if err != nil {
+				log.Fatalf("Error fetching merge requests: %s", err)
+			}
+			if hasCommit(commits, commit) {
+				return mrs[i].UpdatedAt
+			}
+		}
+
+		if resp.CurrentPage >= resp.TotalPages {
+			break
+		}
+
+		options.Page = resp.NextPage
+	}
+	return commit.CommittedDate
+}
+
+func hasCommit(in []*gitlab.Commit, commit *gitlab.Commit) bool {
+	for i := range in {
+		if in[i].ID == commit.ID {
+			return true
+		}
+	}
+	return false
 }
 
 func getBaseUrlAndProjectName(urlStr string) (host string, nameWithNameSpace string, name string, err error) {
