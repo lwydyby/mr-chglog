@@ -7,7 +7,7 @@
 
 ## 简介
 
-读取Gitlab的MR title生成CHANGELOG
+读取Gitlab的MR title生成中文CHANGELOG
 
 ## 安装
 
