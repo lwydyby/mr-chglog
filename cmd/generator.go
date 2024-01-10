@@ -96,7 +96,7 @@ func (g *generatorImpl) getMRGroup(tags []*git.Tag, from *git.Tag, ctx *CLIConte
 				mr[j].Title = mr[j].Title[:strings.Index(mr[j].Title, ":")+1] + resp
 			}
 		}
-		return []*Version{{Tag: nil, MRs: git.GroupByPrefix(mr), SQL: git.GetSQL(mr), Break: git.GetHead(mr, "break")}}
+		return []*Version{{Tag: nil, MRs: git.GroupByPrefix(mr), SQL: git.GetHead(mr, "sql"), Break: git.GetHead(mr, "break")}}
 	}
 
 	results := make([]*Version, 0, len(tags))
@@ -114,14 +114,14 @@ func (g *generatorImpl) getMRGroup(tags []*git.Tag, from *git.Tag, ctx *CLIConte
 				mr[j].Title = mr[j].Title[:strings.Index(mr[j].Title, ":")+1] + resp
 			}
 		}
-		results = append(results, &Version{Tag: tag, MRs: git.GroupByPrefix(mr), SQL: git.GetSQL(mr), Break: git.GetHead(mr, "break")})
+		results = append(results, &Version{Tag: tag, MRs: git.GroupByPrefix(mr), SQL: git.GetHead(mr, "sql"), Break: git.GetHead(mr, "break")})
 
 		prevTag = tag
 	}
 
 	if from == nil && !ctx.IsSingleTag() {
 		mr := g.client.GetMergeRequests(prevTag, nil)
-		results = append(results, &Version{MRs: git.GroupByPrefix(mr), SQL: git.GetSQL(mr), Break: git.GetHead(mr, "break")})
+		results = append(results, &Version{MRs: git.GroupByPrefix(mr), SQL: git.GetHead(mr, "sql"), Break: git.GetHead(mr, "break")})
 	}
 
 	return results
