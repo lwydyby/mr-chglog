@@ -30,19 +30,19 @@ Other content.
 `
 
 func TestGetChangeSQL(t *testing.T) {
-	sql := "--查询用户" + "SELECT * FROM users;\n"
+	sql := "--查询用户\n" + "SELECT * FROM users;\n"
 	mr := &MergeRequest{
 		Description: fmt.Sprintf(md, fmt.Sprintf("```sql\n%s```\n", sql)),
 	}
-	assert.Equal(t, sql, GetSQL([]*MergeRequest{mr}))
+	assert.Equal(t, sql, GetHead([]*MergeRequest{mr}, "sql"))
 }
 
 func TestBreakChange(t *testing.T) {
 	mr := &MergeRequest{
 		Description: fmt.Sprintf(md, fmt.Sprintf("```sql\n%s```\n", "sql")),
 	}
-	br := GetHead([]*MergeRequest{mr}, "break")
-	assert.Equal(t, "\n- test1\n- test2\n", br)
+	br := mr.GetMarkdownInfo("break")
+	assert.Equal(t, "- test1\n- test2\n", br)
 }
 
 func TestGroupByPrefix(t *testing.T) {
