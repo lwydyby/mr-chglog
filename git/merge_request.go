@@ -1,7 +1,6 @@
 package git
 
 import (
-	"fmt"
 	"strings"
 	"time"
 	"unicode"
@@ -38,7 +37,7 @@ func (d Diff) String() string {
 	return d.Diff
 }
 
-func (m *MergeRequest) GetChangeSQL() string {
+func (m *MergeRequest) GetMarkdownInfo(head string) string {
 	gm := goldmark.New(
 		goldmark.WithExtensions(),
 	)
@@ -46,26 +45,13 @@ func (m *MergeRequest) GetChangeSQL() string {
 	reader := text.NewReader([]byte(m.Description))
 	doc := p.Parse(reader)
 
-	var sqlContentBuilder strings.Builder
+	contentBuilder := &strings.Builder{}
 
 	err := ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch node := n.(type) {
 			case *ast.Heading:
-				headingText := string(node.Text(reader.Source()))
-
-				if headingText == "sql" {
-					for child := node.NextSibling(); child != nil && child.Kind() != ast.KindHeading; child = child.NextSibling() {
-						if codeBlock, ok := child.(*ast.FencedCodeBlock); ok {
-							lines := codeBlock.Lines()
-							for i := 0; i < lines.Len(); i++ {
-								line := lines.At(i)
-								sqlContentBuilder.Write(line.Value(reader.Source()))
-							}
-							return ast.WalkStop, nil
-						}
-					}
-				}
+				return walkHead(head, node, contentBuilder, reader), nil
 			}
 		}
 		return ast.WalkContinue, nil
@@ -73,63 +59,53 @@ func (m *MergeRequest) GetChangeSQL() string {
 	if err != nil {
 		panic(err)
 	}
-	return sqlContentBuilder.String()
+	return contentBuilder.String()
 }
 
-func (m *MergeRequest) GetHeadChange(title string) string {
-	return getTextUnderHeading(m.Description, title)
-}
-
-func getTextUnderHeading(markdown, heading string) string {
-	lines := strings.Split(markdown, "\n")
-	start := -1
-	end := -1
-
-	for i, line := range lines {
-		if strings.TrimSpace(line) == fmt.Sprintf("# %s", heading) {
-			start = i
-			continue
-		}
-		if start != -1 && end == -1 && strings.HasPrefix(strings.TrimSpace(line), "#") {
-			end = i
-			break
-		}
+func walkHead(title string, head *ast.Heading, build *strings.Builder, reader text.Reader) ast.WalkStatus {
+	headingText := string(head.Text(reader.Source()))
+	if headingText != title {
+		return ast.WalkContinue
 	}
-
-	if start == -1 {
-		return ""
-	}
-
-	if end == -1 {
-		return strings.Join(lines[start+1:], "\n")
-	}
-
-	return strings.Join(lines[start+1:end], "\n")
-}
-
-func GetSQL(mrs []*MergeRequest) string {
-	var sqlContentBuilder strings.Builder
-	for _, mr := range mrs {
-		sql := mr.GetChangeSQL()
-		if sql != "" {
-			sqlContentBuilder.Write([]byte(sql))
+	for child := head.NextSibling(); child != nil && child.Kind() != ast.KindHeading; child = child.NextSibling() {
+		if breakList, ok := child.(*ast.List); ok {
+			for child := breakList.FirstChild(); child != nil; child = child.NextSibling() {
+				if listItem, ok := child.(*ast.ListItem); ok {
+					segment := listItem.Text(reader.Source())
+					build.WriteByte(breakList.Marker)
+					build.WriteByte(' ')
+					build.Write(segment)
+					build.WriteString("\n")
+				}
+			}
+			return ast.WalkStop
 		}
 	}
-	return sqlContentBuilder.String()
+	for child := head.NextSibling(); child != nil && child.Kind() != ast.KindHeading; child = child.NextSibling() {
+		if codeBlock, ok := child.(*ast.FencedCodeBlock); ok {
+			lines := codeBlock.Lines()
+			for i := 0; i < lines.Len(); i++ {
+				line := lines.At(i)
+				build.Write(line.Value(reader.Source()))
+			}
+			return ast.WalkStop
+		}
+	}
+	return ast.WalkContinue
 }
 
 func GetHead(mrs []*MergeRequest, head string) string {
-	var sqlContentBuilder strings.Builder
+	var contentBuilder strings.Builder
 	for _, mr := range mrs {
-		sql := mr.GetHeadChange(head)
-		if sql != "" && !strings.HasSuffix(sql, "\n") {
-			sql = sql + "\n"
+		content := mr.GetMarkdownInfo(head)
+		if content != "" && !strings.HasSuffix(content, "\n") {
+			content = content + "\n"
 		}
-		if sql != "" {
-			sqlContentBuilder.Write([]byte(sql))
+		if content != "" {
+			contentBuilder.WriteString(content)
 		}
 	}
-	return sqlContentBuilder.String()
+	return contentBuilder.String()
 }
 
 func GroupByPrefix(mrs []*MergeRequest) map[string][]*MergeRequest {
